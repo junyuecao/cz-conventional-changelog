@@ -17,6 +17,7 @@ var filter = function(array) {
 module.exports = function (options) {
 
   var types = options.types;
+  var scopes = options.scopes;
 
   var length = longest(Object.keys(types)).length + 1;
   var choices = map(types, function (type, key) {
@@ -25,6 +26,34 @@ module.exports = function (options) {
       value: key
     };
   });
+
+  var scopeChoices = [
+      {
+        name: rightPad("vesdk" + ':', length) + ' ' + "vesdk的调整针对会影响所有业务的改动",
+        value: "vesdk"
+      },
+      {
+        name: rightPad("douyin" + ':', length) + ' ' + "针对只影响抖音的改动",
+        value: "douyin"
+      },
+      {
+        name: rightPad("huoshan" + ':', length) + ' ' + "针对只影响火山的改动",
+        value: "huoshan"
+      },
+      {
+        name: rightPad("demo" + ':', length) + ' ' + "针对只影响Demo的改动",
+        value: "demo"
+      },
+      {
+        name: rightPad("other" + ':', length) + ' ' + "针对只影响小业务的改动",
+        value: "other"
+      },
+      {
+        name: rightPad("version" + ':', length) + ' ' + "版本提升",
+        value: "version"
+      }
+
+    ];
 
   return {
     // When a user runs `git cz`, prompter will
@@ -52,50 +81,52 @@ module.exports = function (options) {
         {
           type: 'list',
           name: 'type',
-          message: 'Select the type of change that you\'re committing:',
+          message: '请选择该提交的种类:\n',
           choices: choices,
           default: options.defaultType
         }, {
-          type: 'input',
+          type: 'list',
           name: 'scope',
-          message: 'What is the scope of this change (e.g. component or file name)? (press enter to skip)\n',
+          message: '请选择该提交的影响范围:\n',
+          choices: scopeChoices,
           default: options.defaultScope
         }, {
           type: 'input',
           name: 'subject',
-          message: 'Write a short, imperative tense description of the change:\n',
+          message: '请为该提交写一段简短的说明（尽量符合提交的意图）:\n',
           default: options.defaultSubject
         }, {
           type: 'input',
           name: 'body',
-          message: 'Provide a longer description of the change: (press enter to skip)\n',
+          message: '提供一段更详细的描述: (可选)\n',
           default: options.defaultBody
         }, {
           type: 'confirm',
           name: 'isBreaking',
-          message: 'Are there any breaking changes?',
+          message: '是否有不兼容的API变动?',
           default: false
         }, {
           type: 'input',
           name: 'breaking',
-          message: 'Describe the breaking changes:\n',
+          message: '请描述不兼容的API变动:\n',
           when: function(answers) {
             return answers.isBreaking;
           }
-        }, {
-          type: 'confirm',
-          name: 'isIssueAffected',
-          message: 'Does this change affect any open issues?',
-          default: options.defaultIssues ? true : false
-        }, {
-          type: 'input',
-          name: 'issues',
-          message: 'Add issue references (e.g. "fix #123", "re #123".):\n',
-          when: function(answers) {
-            return answers.isIssueAffected;
-          },
-          default: options.defaultIssues ? options.defaultIssues : undefined
         }
+        // , {
+        //   type: 'confirm',
+        //   name: 'isIssueAffected',
+        //   message: '该提交是否影响?',
+        //   default: options.defaultIssues ? true : false
+        // }, {
+        //   type: 'input',
+        //   name: 'issues',
+        //   message: 'Add issue references (e.g. "fix #123", "re #123".):\n',
+        //   when: function(answers) {
+        //     return answers.isIssueAffected;
+        //   },
+        //   default: options.defaultIssues ? options.defaultIssues : undefined
+        // }
       ]).then(function(answers) {
 
         var maxLineWidth = 100;
